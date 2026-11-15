@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // O app só tem tema claro; "class" evita que o NativeWind tente alternar o esquema na web.
+  darkMode: "class",
   // NOTE: Inclui todos os diretórios com componentes e telas do projeto
   content: [
     "./App.{js,jsx,ts,tsx}",
@@ -10,9 +12,15 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
+      fontFamily: {
+        display: ["Poppins_600SemiBold"],
+        "display-bold": ["Poppins_700Bold"],
+        "display-regular": ["Poppins_400Regular"],
+      },
       colors: {
         primary: {
           DEFAULT: "#27D9A7",
+          deep: "#0B9C83",
           light: "#F2FBF8",
         },
         navy: {

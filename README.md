@@ -1,56 +1,56 @@
-# Welcome to your Expo app 👋
+# Bulir Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicação mobile da plataforma de reservas de serviços (Exercício 3). Consome a [Bulir Core API](../bulir-core-api).
 
-## Get started
+**Stack:** Expo SDK 58 · React Native 0.88 · TypeScript · Expo Router (rotas por ficheiro) · NativeWind (Tailwind) · TanStack Query · React Hook Form + Zod · Axios · expo-secure-store
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Como correr
 
 ```bash
-npm run reset-project
+cp .env.example .env     # EXPO_PUBLIC_API_URL
+npm install
+npx expo start           # a (Android), i (iOS) ou w (web)
+npx tsc --noEmit         # verificação de tipos
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+> Em **dispositivo físico**, `localhost` é o próprio telemóvel: use o IP da sua máquina em `EXPO_PUBLIC_API_URL` (ex.: `http://192.168.1.10:3000`). Num emulador Android o equivalente é `http://10.0.2.2:3000`.
 
-### Other setup steps
+## Funcionalidades
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+| Requisito | Onde |
+|---|---|
+| Login com **e-mail ou NIF** + senha; JWT guardado no armazenamento seguro | `features/auth`, `lib/session-storage.ts` |
+| Cadastro de cliente ou prestador | `features/auth/components/RegisterForm` |
+| Prestador: criar, listar (só os seus), editar e excluir serviços | `features/services/components/ProviderServices` |
+| Cliente: ver todos os serviços, pesquisar e contratar | `features/services/components/ServicesCatalog` |
+| Verificação de saldo antes de contratar | `BookServiceSheet` (UI) + API (`400`, atómico) |
+| Histórico: serviço, prestador, cliente, valor e estado | `features/bookings` |
+| Cancelamento com reembolso (cliente **ou** prestador) | `features/bookings` |
+| Carregar saldo (cliente) e ver saldo | `features/wallet` |
 
-## Learn more
+## Validações e permissões
 
-To learn more about developing your project with Expo, look at the following resources:
+- Formulários com Zod (`types/schemas.ts`, o mesmo contrato do web): preço > 0, NIF de 9 a 14 caracteres alfanuméricos, senha de 8 a 72 caracteres.
+- **Rotas protegidas** com `Stack.Protected`: sem token só existe o grupo `(auth)`; com token só o `(app)`. Terminar a sessão ou receber `401` leva automaticamente ao login.
+- A aba "Serviços" muda conforme o perfil (catálogo para cliente, gestão para prestador). A API aplica as mesmas regras (`403`), por isso a UI nunca é a única barreira.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Estrutura
 
-## Join the community
+```
+src/
+  app/                       rotas (auth) e (app) com abas
+  components/ui|form         design system reutilizável (Button, Input, Sheet, Toast, Form*...)
+  features/<area>/           auth, app-shell, overview, services, bookings, wallet (components + hooks)
+  hooks/                     TanStack Query: useAuth, useServices, useBookings, useWallet
+  services/                  cliente Axios por recurso
+  lib/                       formatação, erros, armazenamento da sessão
+```
 
-Join our community of developers creating universal apps.
+Os componentes só desenham; a lógica fica em hooks por feature.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Decisões
+
+- **Token em memória + armazenamento seguro**: o interceptor do Axios lê da memória (sem I/O por pedido) e o `SessionProvider` sincroniza com Keychain/Keystore (`localStorage` só na web).
+- **`web.output: "single"`**: o NativeWind não suporta a renderização no servidor; a web serve apenas para desenvolvimento e verificação rápida.
+- **Painéis (`Sheet`) em vez de modais centrais**: padrão mobile para confirmações e formulários.
+- Não foi configurado ESLint (o `expo lint` pede instalação); a verificação é por `tsc --noEmit`.
