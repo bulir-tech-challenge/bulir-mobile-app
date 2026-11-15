@@ -24,6 +24,7 @@ export function useRegisterForm() {
 
   return {
     control: form.control,
+    trigger: form.trigger,
     // handleSubmit espera um evento web; no onPress do RN não há nenhum.
     onSubmit: () => void submit(),
     isSubmitting: isRegistering || isLoggingIn,

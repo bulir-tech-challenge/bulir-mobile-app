@@ -1,4 +1,18 @@
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+
+// A sombra vai em `style`, e não em `shadow-sm`: essa classe do NativeWind usa uma
+// variável CSS e, aplicada só à opção ativa, faz o componente remontar ao tocar
+// (o NativeWind avisa "variables ... remount" e acaba por rebentar).
+const styles = StyleSheet.create({
+  active: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#0B192C',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
+  },
+})
 
 interface SegmentedControlProps<V extends string> {
   label?: string
@@ -21,7 +35,8 @@ export function SegmentedControl<V extends string>({ label, options, value, onCh
               accessibilityRole="radio"
               accessibilityState={{ checked: active }}
               onPress={() => onChange(option.value)}
-              className={`h-10 flex-1 items-center justify-center rounded-lg ${active ? 'bg-white shadow-sm' : ''}`}
+              style={active ? styles.active : undefined}
+              className="h-10 flex-1 items-center justify-center rounded-lg"
             >
               <Text className={`text-sm font-medium ${active ? 'text-navy-900' : 'text-text-muted'}`}>{option.label}</Text>
             </Pressable>
